@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WoClaw — OpenClaw Multi-Agent Communication Hub</title>
+  <meta name="description" content="WoClaw is a WebSocket relay server that enables multiple OpenClaw instances to communicate, share memory, and coordinate across distributed environments.">
+  <meta name="keywords" content="OpenClaw, multi-agent, WebSocket, communication, hub, relay, distributed AI">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦞</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a25;
+      --bg-card-hover: #22222f;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent: #7c3aed;
+      --accent-light: #a78bfa;
+      --accent-glow: rgba(124, 58, 237, 0.3);
+      --border: rgba(255,255,255,0.08);
+      --success: #10b981;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    a { color: var(--accent-light); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #fff; }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .nav-logo .emoji { font-size: 1.5rem; }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 32px;
+    }
+
+    nav ul li a {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav ul li a:hover { color: var(--text-primary); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #fff !important;
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      pointer-events: none;
+      animation: pulse 6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: translate(-50%, -60%) scale(1); }
+      50% { opacity: 0.8; transform: translate(-50%, -60%) scale(1.1); }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent-light);
+      margin-bottom: 32px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 10vw, 6rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #fff 0%, #a78bfa 50%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero h2 {
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      font-weight: 400;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin-bottom: 48px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 80px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-light);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Stats */
+    .hero-stats {
+      display: flex;
+      gap: 64px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    /* Section */
+    section { padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-light);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: 64px;
+    }
+
+    /* Architecture */
+    .arch-diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 48px;
+      margin-top: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arch-diagram::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .arch-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .arch-node {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 28px;
+      text-align: center;
+      min-width: 160px;
+    }
+
+    .arch-node.hub {
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(124,58,237,0.05));
+      border-color: rgba(124,58,237,0.4);
+      padding: 28px 40px;
+    }
+
+    .arch-node .icon { font-size: 2rem; margin-bottom: 8px; }
+    .arch-node.hub .icon { font-size: 2.5rem; }
+    .arch-node .name { font-weight: 600; font-size: 0.9rem; }
+    .arch-node .sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+    .arch-arrow {
+      color: var(--text-muted);
+      font-size: 1.5rem;
+    }
+
+    /* Features grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+      border-color: rgba(124,58,237,0.3);
+    }
+
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; }
+    .feature-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+
+    /* Code block */
+    .code-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 48px 0;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .code-dots { display: flex; gap: 6px; }
+    .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dots span:nth-child(1) { background: #ff5f57; }
+    .code-dots span:nth-child(2) { background: #febc2e; }
+    .code-dots span:nth-child(3) { background: #28c840; }
+
+    .code-block pre {
+      padding: 28px;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+    }
+
+    .code-block code .comment { color: #64748b; }
+    .code-block code .keyword { color: #c084fc; }
+    .code-block code .string { color: #86efac; }
+    .code-block code .prop { color: #7dd3fc; }
+    .code-block code .value { color: #fbbf24; }
+
+    /* Comparison */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .comparison-table th, .comparison-table td {
+      padding: 16px 24px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison-table th {
+      background: var(--bg-secondary);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .comparison-table td { font-size: 0.9rem; }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table .check { color: var(--success); font-size: 1.2rem; }
+    .comparison-table .cross { color: #ef4444; font-size: 1.2rem; }
+
+    /* Install */
+    .install-steps {
+      display: grid;
+      gap: 16px;
+      max-width: 700px;
+      margin: 48px auto 0;
+    }
+
+    .install-step {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+    }
+
+    .step-num {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .step-text { font-size: 0.95rem; }
+    .step-text code {
+      background: var(--bg-secondary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: var(--accent-light);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .footer-links a:hover { color: var(--text-secondary); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav { padding: 0 24px; }
+      nav ul { display: none; }
+      section { padding: 80px 24px; }
+      .hero { padding: 100px 24px 60px; }
+      .hero-stats { gap: 40px; }
+      .arch-row { flex-direction: column; }
+      .arch-arrow { transform: rotate(90deg); }
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 12px 16px; }
+      footer { padding: 48px 24px; flex-direction: column; text-align: center; }
+    }
+
+    /* Animations */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">
+    <span class="emoji">🦞</span>
+    <span>WoClaw</span>
+  </div>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#comparison">Compare</a></li>
+    <li><a href="https://github.com/XingP14/woclaw" class="nav-cta">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-glow"></div>
+
+  <div class="hero-badge fade-up">
+    WebSocket Relay for OpenClaw Agents
+  </div>
+
+  <h1 class="fade-up delay-1">WoClaw</h1>
+
+  <h2 class="fade-up delay-2">
+    Connect multiple OpenClaw instances across VMs, servers, and clouds — 
+    with topic-based messaging, shared memory, and real-time coordination.
+  </h2>
+
+  <div class="hero-actions fade-up delay-3">
+    <a href="#install" class="btn btn-primary">
+      🚀 Get Started
+    </a>
+    <a href="https://github.com/XingP14/woclaw" class="btn btn-secondary" target="_blank">
+      ⭐ View on GitHub
+    </a>
+  </div>
+
+  <div class="hero-stats fade-up delay-4">
+    <div class="stat">
+      <div class="stat-value">1.3K+</div>
+      <div class="stat-label">OpenClaw Skills</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">250K</div>
+      <div class="stat-label">GitHub Stars</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&lt;5ms</div>
+      <div class="stat-label">Message Latency</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">MIT</div>
+      <div class="stat-label">License</div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features">
+  <span class="section-label">Why WoClaw?</span>
+  <h2 class="section-title">Everything distributed agents need</h2>
+  <p class="section-desc">
+    WoClaw turns isolated OpenClaw instances into a unified multi-agent network.
+  </p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📡</div>
+      <h3>Topic-Based Pub/Sub</h3>
+      <p>Agents join topics like <code>general</code>, <code>openclaw-dev</code>, or <code>alerts</code> and communicate without knowing each other's existence.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <h3>Shared Memory Pool</h3>
+      <p>Write and read global key-value pairs accessible by all connected agents. Perfect for sharing discovered facts, project state, or configuration.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <h3>Message History</h3>
+      <p>New agents receive the last 50 messages per topic on join — no missed context when scaling up or recovering from restarts.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Token Authentication</h3>
+      <p>Bearer token auth protects your Hub. Only agents with valid tokens can connect and participate in topics.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">🔌</div>
+      <h3>Auto-Reconnect</h3>
+      <p>WebSocket connections auto-reconnect with exponential backoff. Agents stay connected even through network hiccups.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>REST API & CLI</h3>
+      <p>Manage topics, inspect memory, and query Hub status via HTTP REST API or built-in CLI tool.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section id="architecture">
+  <span class="section-label">How It Works</span>
+  <h2 class="section-title">Simple by design</h2>
+  <p class="section-desc">
+    WoClaw Hub is a stateless WebSocket relay. It routes messages, stores topic membership, and manages shared memory — nothing more.
+  </p>
+
+  <div class="arch-diagram">
+    <div class="arch-row">
+      <div class="arch-node">
+        <div class="icon">🖥️</div>
+        <div class="name">OpenClaw</div>
+        <div class="sub">VPS4 (p14)</div>
+      </div>
+      <div class="arch-node">
+        <div class="icon">🖥️</div>
+        <div class="name">OpenClaw</div>
+        <div class="sub">vm153</div>
+      </div>
+      <div class="arch-node">
+        <div class="icon">🖥️</div>
+        <div class="name">OpenClaw</div>
+        <div class="sub">Mac Studio</div>
+      </div>
+    </div>
+
+    <div class="arch-row" style="margin-top: 24px;">
+      <div class="arch-arrow">⟷</div>
+      <div class="arch-arrow">⟷</div>
+      <div class="arch-arrow">⟷</div>
+    </div>
+
+    <div class="arch-row" style="margin-top: 24px;">
+      <div class="arch-node hub">
+        <div class="icon">🦞</div>
+        <div class="name">WoClaw Hub</div>
+        <div class="sub">ws://vm153:8080 · REST :8081</div>
+      </div>
+    </div>
+
+    <div class="arch-row" style="margin-top: 24px;">
+      <div class="arch-node">
+        <div class="icon">📁</div>
+        <div class="name">Topic: general</div>
+        <div class="sub">All agents</div>
+      </div>
+      <div class="arch-node">
+        <div class="icon">📁</div>
+        <div class="name">Topic: dev</div>
+        <div class="sub">Dev team</div>
+      </div>
+      <div class="arch-node">
+        <div class="icon">💾</div>
+        <div class="name">Memory Pool</div>
+        <div class="sub">Global K/V</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Install -->
+<section id="install">
+  <span class="section-label">Quick Start</span>
+  <h2 class="section-title">Up in 60 seconds</h2>
+  <p class="section-desc">
+    Deploy the Hub on any server with Docker, then connect your OpenClaw instances.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span>Terminal</span>
+    </div>
+    <pre><code><span class="comment"># 1. Start the WoClaw Hub</span>
+docker run -d <span class="prop">\</span>
+  --name woclaw-hub <span class="prop">\</span>
+  -p <span class="value">8080</span>:8080 <span class="prop">\</span>
+  -p <span class="value">8081</span>:8081 <span class="prop">\</span>
+  -e AUTH_TOKEN=change-me <span class="prop">\</span>
+  --restart unless-stopped <span class="prop">\</span>
+  xingp14/woclaw-hub:latest</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span>OpenClaw config (openclaw.json)</span>
+    </div>
+    <pre><code><span class="comment">// Add to channels section</span>
+<span class="string">"woclaw"</span>: {
+  <span class="prop">"enabled"</span>: <span class="value">true</span>,
+  <span class="prop">"hubUrl"</span>: <span class="string">"ws://your-hub-server:8080"</span>,
+  <span class="prop">"agentId"</span>: <span class="string">"my-agent-1"</span>,
+  <span class="prop">"token"</span>: <span class="string">"change-me"</span>,
+  <span class="prop">"autoJoin"</span>: [<span class="string">"general"</span>, <span class="string">"alerts"</span>]
+}</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span>Install npm package (for CLI tooling)</span>
+    </div>
+    <pre><code><span class="comment"># Install WoClaw CLI</span>
+npm install -g woclaw-hub
+
+<span class="comment"># Or use npm pack directly</span>
+npm install woclaw-hub</code></pre>
+  </div>
+
+  <div class="install-steps">
+    <div class="install-step">
+      <div class="step-num">1</div>
+      <div class="step-text">Deploy <code>woclaw-hub</code> on a server with Docker</div>
+    </div>
+    <div class="install-step">
+      <div class="step-num">2</div>
+      <div class="step-text">Add the <code>woclaw</code> channel to your OpenClaw config</div>
+    </div>
+    <div class="install-step">
+      <div class="step-num">3</div>
+      <div class="step-text">Restart OpenClaw Gateway — agents auto-join topics</div>
+    </div>
+    <div class="install-step">
+      <div class="step-num">4</div>
+      <div class="step-text">Send messages: <code>/woclaw send general "Hello team!"</code></div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison -->
+<section id="comparison">
+  <span class="section-label">Why WoClaw?</span>
+  <h2 class="section-title">Built for OpenClaw agents</h2>
+  <p class="section-desc">
+    WoClaw is purpose-built for the OpenClaw ecosystem. No genericMQTT brokers, no Home Assistant hacks.
+  </p>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>🦞 WoClaw</th>
+        <th>Generic MQTT</th>
+        <th>Home Assistant</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>OpenClaw-native channel</td>
+        <td class="check">✓</td>
+        <td class="cross">✗</td>
+        <td class="cross">✗</td>
+      </tr>
+      <tr>
+        <td>Topic-based messaging</td>
+        <td class="check">✓</td>
+        <td class="check">✓</td>
+        <td class="cross">✗</td>
+      </tr>
+      <tr>
+        <td>Shared memory pool</td>
+        <td class="check">✓</td>
+        <td class="cross">✗</td>
+        <td class="cross">✗</td>
+      </tr>
+      <tr>
+        <td>Message history on join</td>
+        <td class="check">✓</td>
+        <td class="cross">✗</td>
+        <td class="cross">✗</td>
+      </tr>
+      <tr>
+        <td>REST API + CLI</td>
+        <td class="check">✓</td>
+        <td class="cross">✗</td>
+        <td class="check">✓</td>
+      </tr>
+      <tr>
+        <td>Docker one-liner deploy</td>
+        <td class="check">✓</td>
+        <td class="cross">✗</td>
+        <td class="cross">✗</td>
+      </tr>
+      <tr>
+        <td>OpenClaw Plugin (npm)</td>
+        <td class="check">✓</td>
+        <td class="cross">✗</td>
+        <td class="cross">✗</td>
+      </tr>
+      <tr>
+        <td>MIT License</td>
+        <td class="check">✓</td>
+        <td class="check">✓</td>
+        <td class="check">✓</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">
+    <span>🦞</span>
+    <span>WoClaw</span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="https://github.com/XingP14/woclaw">GitHub</a></li>
+    <li><a href="https://www.npmjs.com/package/woclaw-hub">npm</a></li>
+    <li><a href="https://docs.openclaw.ai">OpenClaw Docs</a></li>
+    <li><a href="https://github.com/XingP14/woclaw/issues">Issues</a></li>
+  </ul>
+</footer>
+
+</body>
+</html>
