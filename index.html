@@ -96,13 +96,13 @@
     .step-num { width: 34px; height: 34px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; flex-shrink: 0; }
     .step-text { font-size: 0.9rem; }
     .step-text code { background: var(--bg-secondary); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; color: var(--accent-light); }
-    .vs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; margin-top: 48px; }
-    .vs-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
-    .vs-card.highlight { border-color: rgba(124,58,237,0.4); background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(124,58,237,0.02)); }
-    .vs-card h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
-    .vs-card .tagline { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
-    .vs-card .pro { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
-    .vs-card .icon { flex-shrink: 0; margin-top: 2px; }
+    
+    
+    
+    
+    
+    
+    
     .icon-check { color: var(--success); }
     .icon-cross { color: #ef4444; }
     footer { border-top: 1px solid var(--border); padding: 64px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; max-width: 1200px; margin: 0 auto; }
@@ -116,7 +116,7 @@
       .hero-stats { gap: 40px; }
       .arch-row { flex-direction: column; }
       .arch-arrow { transform: rotate(90deg); }
-      .vs-grid { grid-template-columns: 1fr; }
+      
       footer { padding: 48px 24px; flex-direction: column; text-align: center; }
     }
     .fade-up { opacity: 0; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
@@ -135,7 +135,7 @@
     <li><a href="#shared-memory">Shared Memory</a></li>
     <li><a href="#features">Features</a></li>
     <li><a href="#install">Install</a></li>
-    <li><a href="#vs">vs Mnemon</a></li>
+    
     <li><a href="https://github.com/XingP14/woclaw" class="nav-cta">GitHub</a></li>
   </ul>
 </nav>
@@ -164,7 +164,7 @@
 
   <div class="promise-grid">
     <div class="promise-card">
-      <div class="promise-icon">🧠</div>
+      <div class="promise-icon"></div>
       <h3>Shared Project Memory</h3>
       <p>All agents read from and write to the same WoClaw memory pool. Key decisions, discovered facts, project state — available to every agent instantly.</p>
     </div>
@@ -223,7 +223,7 @@
   <div class="features-grid">
     <div class="feature-card">
       <span class="badge badge-core">Core</span>
-      <div class="feature-icon">🧠</div>
+      <div class="feature-icon"></div>
       <h3>Shared Memory Pool</h3>
       <p>Global key-value store accessible by all connected agents. Write once, read everywhere. Perfect for project state, key decisions, discovered facts.</p>
     </div>
@@ -243,7 +243,7 @@
       <span class="badge badge-core">Core</span>
       <div class="feature-icon">🪝</div>
       <h3>Hook-Based Integration</h3>
-      <p>Agents integrate via lifecycle hooks (SessionStart, UserPrompt, Stop, PreCompact) — the same pattern Mnemon uses. Zero framework coupling.</p>
+      <p>Agents integrate via lifecycle hooks (SessionStart, UserPrompt, Stop, PreCompact) — the same pattern Gemini CLI uses. Zero framework coupling.</p>
     </div>
     <div class="feature-card">
       <span class="badge badge-new">New</span>
@@ -267,7 +267,7 @@
       <span class="badge badge-soon">Soon</span>
       <div class="feature-icon">🔍</div>
       <h3>Semantic Recall</h3>
-      <p>Graph-based memory with intent-aware recall. Remember, link, and recall — following the Mnemon LLM-supervised pattern built on WoClaw's transport.</p>
+      <p>Graph-based memory with intent-aware recall. Remember, link, and recall — following the Gemini CLI LLM-supervised pattern built on WoClaw's transport.</p>
     </div>
   </div>
 </section>
@@ -314,47 +314,14 @@ ws://your-hub:8080?agentId=claude-code&token=my-token</code></pre>
   </div>
 </section>
 
-<section id="vs">
-  <span class="section-label">Comparison</span>
-  <h2 class="section-title">WoClaw vs Mnemon</h2>
-  <p class="section-desc">Mnemon is a local binary with SQLite. WoClaw is a network-native hub with real-time sync. They solve different problems — and can work together.</p>
 
-  <div class="vs-grid">
-    <div class="vs-card highlight">
-      <h3>🦞</h3>
-      <div class="tagline">WoClaw — Network-native shared memory</div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Real-time WebSocket sync across machines — agents don't need to be on the same host</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Topic-based pub/sub for real-time conversation between agents</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>REST API + WebSocket — any framework can connect via HTTP or WS</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Multi-agent orchestration — agents can send messages to each other, not just read memory</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>MCP server interface built-in</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Message history — last 50 messages per topic available on join</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Hooks system for LLM-supervised memory (remember/recall/link)</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>OpenClaw plugin with native channel support</span></div>
-    </div>
-    <div class="vs-card">
-      <h3>🧠</h3>
-      <div class="tagline">Mnemon — Local LLM-supervised memory binary</div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Graph-based memory with 4 edge types (temporal, entity, causal, semantic)</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Importance decay and garbage collection built-in</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Deduplication and conflict detection</span></div>
-      <div class="pro"><span class="icon icon-check">✓</span><span>Works fully offline (no network required)</span></div>
-      <div class="pro"><span class="icon icon-cross">✗</span><span>Single-host only — ~/.mnemon directory</span></div>
-      <div class="pro"><span class="icon icon-cross">✗</span><span>No real-time sync — agents share via file system</span></div>
-      <div class="pro"><span class="icon icon-cross">✗</span><span>No topic-based messaging between agents</span></div>
-      <div class="pro"><span class="icon icon-cross">✗</span><span>No MCP or WebSocket native interface</span></div>
-    </div>
-  </div>
-
-  <p style="margin-top: 32px; text-align: center; font-size: 0.9rem; color: var(--text-secondary);">💡 <strong>Best of both:</strong> Use WoClaw Hub as the transport layer + install Mnemon on each host for local graph-based memory. WoClaw syncs across hosts, Mnemon organizes memory within each host.</p>
-</section>
 
 <footer>
   <div class="footer-logo"><span>🦞</span><span>WoClaw</span></div>
   <ul class="footer-links">
     <li><a href="https://github.com/XingP14/woclaw">GitHub</a></li>
     <li><a href="https://www.npmjs.com/package/woclaw-hub">npm</a></li>
-    <li><a href="https://github.com/mnemon-dev/mnemon">Mnemon</a></li>
+    <li><a href="https://github.com/Gemini CLI-dev/Gemini CLI">Gemini CLI</a></li>
     <li><a href="https://docs.openclaw.ai">OpenClaw Docs</a></li>
   </ul>
 </footer>
