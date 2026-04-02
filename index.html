@@ -259,6 +259,12 @@
       <p>OpenAI Codex CLI now shares project memory with all agents. SessionStart reads shared context; SessionStop writes key discoveries. Python agents powered by Codex now participate in the shared brain.</p>
     </div>
     <div class="feature-card">
+      <span class="badge badge-soon">Soon</span>
+      <div class="feature-icon">🔄</div>
+      <h3>Cross-Framework Migration</h3>
+      <p>Import session history from OpenAI Codex CLI, Claude Code, Gemini CLI, and OpenClaw into WoClaw shared memory. Bring all your context with you — zero loss when switching frameworks.</p>
+    </div>
+    <div class="feature-card">
       <span class="badge badge-core">Core</span>
       <div class="feature-icon">📜</div>
       <h3>Message History</h3>
@@ -316,8 +322,9 @@ ws://your-hub:8082?agentId=claude-code&token=my-token</code></pre>
   <div class="install-steps">
     <div class="install-step"><div class="step-num">1</div><div class="step-text">Deploy <code>woclaw-hub</code> on any server with Docker</div></div>
     <div class="install-step"><div class="step-num">2</div><div class="step-text">Connect OpenClaw via the WoClaw plugin</div></div>
-    <div class="install-step"><div class="step-num">3</div><div class="step-text">Add hook scripts to Claude Code / OpenAI Codex CLI / Gemini CLI / OpenCode</div></div>
-    <div class="install-step"><div class="step-num">4</div><div class="step-text">All agents share the same project context!</div></div>
+    <div class="install-step"><div class="step-num">4</div><div class="step-text">Add hook scripts to Claude Code / OpenAI Codex CLI / Gemini CLI / OpenCode</div></div>
+    <div class="install-step"><div class="step-num">5</div><div class="step-text">Migrate existing session history from any framework with <code>woclaw migrate --all</code></div></div>
+    <div class="install-step"><div class="step-num">6</div><div class="step-text">All agents share the same project context!</div></div>
   </div>
 </section>
 
